@@ -74,7 +74,7 @@ runs:
         echo "${bin}" | sed "s:^${work_dir}:.:"
         exit 1
       fi
-      output="${output:-$(basename "${bin}")"}"
+      output="${output:-$(basename "${bin}")}"
       output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"
