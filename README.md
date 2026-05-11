@@ -27,6 +27,14 @@ See [action.yml](action.yml)
     # The go package's version to install.
     # Default: none
     version: ''
+    # Optional os.
+    # Operating system to target. If defined, output-dir must also be defined.
+    # Default: GOOS
+    os: ''
+    # Optional arch.
+    # Architecture to target. If defined, output-dir must also be defined.
+    # Default: GOARCH
+    arch: ''
     # Optional modfile.
     # Path to a go.mod file that defines the version for the package.
     # Default: none

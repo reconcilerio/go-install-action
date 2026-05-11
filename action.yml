@@ -6,6 +6,10 @@ inputs:
     required: true
   version:
     description: version of go package to install
+  os:
+    description: operating system to target
+  arch:
+    description: architecture to target
   modfile:
     description: path to go.mod file defining the package's version
   output:
@@ -29,6 +33,8 @@ runs:
 
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
+      os="${{ inputs.os }}"
+      arch="${{ inputs.arch }}"
       modfile="${{ inputs.modfile }}"
       output="${{ inputs.output }}"
       output_dir="${{ inputs.output-dir }}"
@@ -36,11 +42,22 @@ runs:
       
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
+      goos="${os:-$(go env GOOS)}"
+      goarch="${arch:-$(go env GOARCH)}"
+
+      if [[ "${os}" != "" && "${output_dir}" == "" ]] ; then
+        echo "::error title='output-dir' input required::the 'output-dir' input must be defined when 'os' input is used"
+        exit 1
+      fi
+      if [[ "${arch}" != "" && "${output_dir}" == "" ]] ; then
+        echo "::error title='output-dir' input required::the 'output-dir' input must be defined when 'arch' input is used"
+        exit 1
+      fi
 
       work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
       mkdir -p "${work_dir}"
 
-      cmd=""
+      cmd="GOOS=${goos} GOARCH=${goarch} go install"
       if [[ "${modfile}" != "" ]] ; then
         cmd="${cmd:+${cmd} }-modfile ${modfile}"
       fi
@@ -49,12 +66,18 @@ runs:
         cmd="${cmd}@${version}"
       fi
 
-      echo "##[group]go install ${cmd}"
-        GOBIN="${work_dir}" go install ${cmd}
+      echo "##[group]${cmd}"
+        GOBIN="${work_dir}" ${cmd}
       echo "##[endgroup]"
 
-      bin="$(ls -1 "${work_dir}")"
-      output="${output:-${bin}}"
+      bin="$(find "${work_dir}" -type f)"
+      if [[ "$(echo "${bin}" | wc -l)" != "1" ]] ; then
+        # TODO provide a way to pick the file
+        echo "::error title=extra build files found::exactly one file is expected to be built"
+        echo "${bin}" | sed "s:^${work_dir}:.:"
+        exit 1
+      fi
+      output="${output:-$(basename "${bin}")"}"
       output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"

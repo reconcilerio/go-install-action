@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-24.04
+        - runner: ubuntu-24.04
           version: latest
-        - os: ubuntu-24.04-arm
+        - runner: ubuntu-24.04-arm
           version: latest
         # git tag
         - version: v0.20.0
@@ -33,7 +33,12 @@ jobs:
           output-dir: /usr/local/bin
           output-path-env: KIND
           test-args: --version
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+        - version: latest
+          os: windows
+          arch: arm64
+          output_dir: .
+          skip-tests: true
+    runs-on: ${{ matrix.runner || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-go@v6
@@ -45,12 +50,15 @@ jobs:
       with:
         package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
         version: ${{ matrix.version }}
+        os: ${{ matrix.os }}
+        arch: ${{ matrix.arch }}
         modfile: ${{ matrix.modfile }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}
     - name: Test install
+      if: success() && ! matrix.skip-tests
       run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
     - name: Test install env
-      if: matrix.output-path-env
+      if: success() && ! matrix.skip-tests && matrix.output-path-env
       run: ${${{ matrix.output-path-env }}} ${{ matrix.test-args || 'version' }}
