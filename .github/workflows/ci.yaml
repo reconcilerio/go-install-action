@@ -29,6 +29,7 @@ jobs:
           output-path-env: CRANE
         - package: sigs.k8s.io/kind
           version: latest
+          output: kind-latest
           output-path-env: KIND
           test-args: --version
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}

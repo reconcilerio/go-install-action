@@ -8,6 +8,8 @@ inputs:
     description: version of go package to install
   modfile:
     description: path to go.mod file defining the package's version
+  output:
+    description: name of the built binary
   output-path-env:
     description: environment variable containing the output path
 outputs:
@@ -26,6 +28,7 @@ runs:
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
       modfile="${{ inputs.modfile }}"
+      output="${{ inputs.output }}"
       output_path_env="${{ inputs.output-path-env }}"
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
@@ -33,6 +36,9 @@ runs:
       cmd=""
       if [[ "${modfile}" != "" ]] ; then
         cmd="${cmd:+${cmd} }-modfile ${modfile}"
+      fi
+      if [[ "${output}" != "" ]] ; then
+        cmd="${cmd:+${cmd} }-o ${output}"
       fi
       cmd="${cmd:+${cmd} }${package}"
       if [[ "${version}" != "" ]] ; then
@@ -43,7 +49,7 @@ runs:
         go install ${cmd}
       echo "##[endgroup]"
 
-      path="${gobin:-${gopath}/bin}/$(basename "${package}")"
+      path="${gobin:-${gopath}/bin}/${output:-$(basename "${package}")}"
       [ -f "${path}" ]
 
       echo "installed to: ${path}"
