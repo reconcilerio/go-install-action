@@ -57,7 +57,7 @@ runs:
       work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
       mkdir -p "${work_dir}"
 
-      cmd="GOOS=${goos} GOARCH=${goarch} go install"
+      cmd="go install"
       if [[ "${modfile}" != "" ]] ; then
         cmd="${cmd:+${cmd} }-modfile ${modfile}"
       fi
@@ -67,7 +67,7 @@ runs:
       fi
 
       echo "##[group]${cmd}"
-        GOBIN="${work_dir}" ${cmd}
+        GOBIN="${work_dir}" GOOS="${goos}" GOARCH="${goarch}" ${cmd}
       echo "##[endgroup]"
 
       bin="$(find "${work_dir}" -type f)"
