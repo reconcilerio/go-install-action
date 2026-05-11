@@ -54,17 +54,17 @@ runs:
       work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
       mkdir -p "${work_dir}"
 
-      cmd="go install"
+      args=""
       if [[ "${modfile}" != "" ]] ; then
-        cmd="${cmd:+${cmd} }-modfile ${modfile}"
+        args="${args:+${args} }-modfile ${modfile}"
       fi
-      cmd="${cmd:+${cmd} }${package}"
+      args="${args:+${args} }${package}"
       if [[ "${version}" != "" ]] ; then
-        cmd="${cmd}@${version}"
+        args="${args}@${version}"
       fi
 
-      echo "##[group]${cmd}"
-        GOBIN="${work_dir}" GOOS="${goos}" GOARCH="${goarch}" ${cmd}
+      echo "##[group]go install ${args}"
+        GOOS="${goos}" GOARCH="${goarch}" go build -o ${work_dir} ${args}
       echo "##[endgroup]"
 
       bin="$(find "${work_dir}" -type f)"
