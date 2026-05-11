@@ -10,6 +10,8 @@ inputs:
     description: path to go.mod file defining the package's version
   output:
     description: name of the built binary
+  output-dir:
+    description: directory to place to build binary
   output-path-env:
     description: environment variable containing the output path
 outputs:
@@ -29,6 +31,7 @@ runs:
       version="${{ inputs.version }}"
       modfile="${{ inputs.modfile }}"
       output="${{ inputs.output }}"
+      output_dir="${{ inputs.output-dir }}"
       output_path_env="${{ inputs.output-path-env }}"
       
       gobin="$(go env GOBIN)"
@@ -52,7 +55,7 @@ runs:
 
       bin="$(ls -1 "${work_dir}")"
       output="${output:-${bin}}"
-      output_dir="${gobin:-${gopath}/bin}"
+      output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"
       mv "${work_dir}/${bin}" "${path}"

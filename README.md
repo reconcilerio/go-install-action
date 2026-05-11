@@ -35,6 +35,10 @@ See [action.yml](action.yml)
     # Name of the built binary.
     # Default: none
     output: ''
+    # Optional output-dir.
+    # Directory to place the built binary. Defaults to `${GOBIN}` or `${GOPATH}/bin`.
+    # Default: none
+    output-dir: ''
     # Optional output-path-env.
     # Environment variable to set the output path to.
     # Default: none
@@ -49,8 +53,8 @@ steps:
 - uses: reconcilerio/go-install-action@v1
   with:
     package: github.com/google/go-containerregistry/cmd/crane
-    output-path-env: CRANE
-- run: ${CRANE} ls ubuntu
+    output-dir: /usr/local/bin
+- run: crane ls ubuntu
 ```
 
 When building from source, an appropriate go toolchain is required. If unsure, favor a more recent toolchain version.

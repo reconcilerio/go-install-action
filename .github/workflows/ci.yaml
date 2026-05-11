@@ -30,6 +30,7 @@ jobs:
         - package: sigs.k8s.io/kind
           version: latest
           output: kind-latest
+          output-dir: /usr/local/bin
           output-path-env: KIND
           test-args: --version
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -46,6 +47,7 @@ jobs:
         version: ${{ matrix.version }}
         modfile: ${{ matrix.modfile }}
         output: ${{ matrix.output }}
+        output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}
     - name: Test install
       run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
