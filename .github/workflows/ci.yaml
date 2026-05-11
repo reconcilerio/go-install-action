@@ -25,6 +25,12 @@ jobs:
         # git commit
         - version: d36047ae385302d20acd872e28f036a475fb9417
         - modfile: hack/crane/go.mod
+        - version: latest
+          output-path-env: CRANE
+        - package: sigs.k8s.io/kind
+          version: latest
+          output-path-env: KIND
+          test-args: --version
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v6
@@ -38,5 +44,9 @@ jobs:
         package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
         version: ${{ matrix.version }}
         modfile: ${{ matrix.modfile }}
+        output-path-env: ${{ matrix.output-path-env }}
     - name: Test install
-      run: ${{ steps.install.outputs.path }} ${{ matrix['test-args'] || 'version' }}
+      run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
+    - name: Test install env
+      if: matrix.output-path-env
+      run: ${${{ matrix.output-path-env }}} ${{ matrix.test-args || 'version' }}

@@ -31,6 +31,10 @@ See [action.yml](action.yml)
     # Path to a go.mod file that defines the version for the package.
     # Default: none
     modfile: ''
+    # Optional output-path-env.
+    # Environment variable to set the output path to.
+    # Default: none
+    output-path-env: ''
 ```
 <!-- end usage -->
 

@@ -8,6 +8,8 @@ inputs:
     description: version of go package to install
   modfile:
     description: path to go.mod file defining the package's version
+  output-env:
+    description: environment variable containing the output path
 outputs:
   path:
     description: Path to the installed package binary
@@ -24,6 +26,7 @@ runs:
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
       modfile="${{ inputs.modfile }}"
+      output_path_env="${{ inputs.output-path-env }}"
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
 
@@ -45,4 +48,7 @@ runs:
 
       echo "installed to: ${path}"
       echo "path=${path}" >> "${GITHUB_OUTPUT}"
+      if [[ "${output_path_env}" != "" ]] ; then
+        echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
+      fi
     shell: bash
