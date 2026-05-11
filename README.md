@@ -45,7 +45,8 @@ steps:
 - uses: reconcilerio/go-install-action@v1
   with:
     package: github.com/google/go-containerregistry/cmd/crane
-- run: crane ls ubuntu
+    output-path-env: CRANE
+- run: ${CRANE} ls ubuntu
 ```
 
 When building from source, an appropriate go toolchain is required. If unsure, favor a more recent toolchain version.

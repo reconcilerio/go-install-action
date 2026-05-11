@@ -8,7 +8,7 @@ inputs:
     description: version of go package to install
   modfile:
     description: path to go.mod file defining the package's version
-  output-env:
+  output-path-env:
     description: environment variable containing the output path
 outputs:
   path:
