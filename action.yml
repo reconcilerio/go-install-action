@@ -30,15 +30,16 @@ runs:
       modfile="${{ inputs.modfile }}"
       output="${{ inputs.output }}"
       output_path_env="${{ inputs.output-path-env }}"
+      
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
+
+      work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
+      mkdir -p "${work_dir}"
 
       cmd=""
       if [[ "${modfile}" != "" ]] ; then
         cmd="${cmd:+${cmd} }-modfile ${modfile}"
-      fi
-      if [[ "${output}" != "" ]] ; then
-        cmd="${cmd:+${cmd} }-o ${output}"
       fi
       cmd="${cmd:+${cmd} }${package}"
       if [[ "${version}" != "" ]] ; then
@@ -46,15 +47,20 @@ runs:
       fi
 
       echo "##[group]go install ${cmd}"
-        go install ${cmd}
+        GOBIN="${work_dir}" go install ${cmd}
       echo "##[endgroup]"
 
-      path="${gobin:-${gopath}/bin}/${output:-$(basename "${package}")}"
-      [ -f "${path}" ]
+      bin="$(ls -1 "${work_dir}")"
+      output="${output:-${bin}}"
+      output_dir="${gobin:-${gopath}/bin}"
+      mkdir -p "${output_dir}"
+      path="${output_dir}/${output}"
+      mv "${work_dir}/${bin}" "${path}"
 
       echo "installed to: ${path}"
       echo "path=${path}" >> "${GITHUB_OUTPUT}"
       if [[ "${output_path_env}" != "" ]] ; then
         echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
       fi
+      rm -rf "${work_dir}"
     shell: bash
