@@ -36,7 +36,7 @@ jobs:
         - version: latest
           os: windows
           arch: arm64
-          output_dir: .
+          output-dir: .
           skip-tests: true
     runs-on: ${{ matrix.runner || 'ubuntu-latest' }}
     steps:

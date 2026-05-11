@@ -45,13 +45,10 @@ runs:
       goos="${os:-$(go env GOOS)}"
       goarch="${arch:-$(go env GOARCH)}"
 
-      if [[ "${os}" != "" && "${output_dir}" == "" ]] ; then
-        echo "::error title='output-dir' input required::the 'output-dir' input must be defined when 'os' input is used"
-        exit 1
-      fi
-      if [[ "${arch}" != "" && "${output_dir}" == "" ]] ; then
-        echo "::error title='output-dir' input required::the 'output-dir' input must be defined when 'arch' input is used"
-        exit 1
+      if [[ "${output_dir}" == "" ]] ; then
+        if [[ "${os}" != "" || "${arch}" != "" ]] ; then
+          echo "::error title='output-dir' input missing::the 'output-dir' input is recommended when 'os' or 'arch' inputs are used"
+        fi
       fi
 
       work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"

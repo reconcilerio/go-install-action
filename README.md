@@ -28,11 +28,11 @@ See [action.yml](action.yml)
     # Default: none
     version: ''
     # Optional os.
-    # Operating system to target. If defined, output-dir must also be defined.
+    # Operating system to target. If defined, output-dir should also be defined.
     # Default: GOOS
     os: ''
     # Optional arch.
-    # Architecture to target. If defined, output-dir must also be defined.
+    # Architecture to target. If defined, output-dir should also be defined.
     # Default: GOARCH
     arch: ''
     # Optional modfile.
