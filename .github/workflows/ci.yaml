@@ -24,7 +24,7 @@ jobs:
         - version: v0.20.0
         # git commit
         - version: d36047ae385302d20acd872e28f036a475fb9417
-        - modfile: hack/crane/go.mod
+        - working-directory: hack/crane
         - version: latest
           output-path-env: CRANE
         - package: sigs.k8s.io/kind
@@ -45,7 +45,7 @@ jobs:
       with:
         package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
         version: ${{ matrix.version }}
-        modfile: ${{ matrix.modfile }}
+        working-directory: ${{ matrix.working-directory }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}

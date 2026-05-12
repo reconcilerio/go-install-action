@@ -6,8 +6,9 @@ inputs:
     required: true
   version:
     description: version of go package to install
-  modfile:
-    description: path to go.mod file defining the package's version
+  working-directory:
+    description: directory containing a go.mod file defining the package's version
+    default: '.'
   output:
     description: name of the built binary
   output-dir:
@@ -18,52 +19,101 @@ outputs:
   path:
     description: Path to the installed package binary
     value: ${{ steps.install.outputs.path }}
-
 runs:
   using: "composite"
   steps:
-  - name: install ${{ inputs.package }}
-    id: install
+  - name: Prep
+    id: prep
     run: |
       set -euo pipefail
 
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
-      modfile="${{ inputs.modfile }}"
+
+      goversion="$(go env GOVERSION)"
+      gotoolchain="$(go env GOTOOLCHAIN)"
+      goos="$(go env GOOS)"
+      goarch="$(go env GOARCH)"
+
+      # create unique directory for each run
+      cache_dir="${RUNNER_TEMP}/${{ github.action_repository }}"
+      mkdir -p "${cache_dir}"
+      cache_dir="${cache_dir}/$(ls -1 "${cache_dir}" | wc -l)"
+      mkdir -p "${cache_dir}"
+
+      echo "##[group]verify package and version"
+        normalized_version=""
+        normalized_module="${package}"
+
+        while true; do
+          if ! normalized_version="$(go list -m -f '{{.Version}}' "${normalized_module}${version:+@${version}}")" ; then
+            normalized_module="$(dirname "${normalized_module}")"
+          fi
+          if [[ "${normalized_module}" == "" ]] ; then
+            echo "::error title=Unknown package::no module found for the package ${package}${version:+@${version}}"
+            exit 1
+          fi
+
+          # exit once we found the module
+          [[ "${normalized_version}" != "" ]] && break
+        done
+      echo "##[endgroup]"
+
+      echo "Resolved module: ${normalized_module}@${normalized_version}"
+
+      cache_key="reconcilerio/go-install-action--${package}@${normalized_version}--${goos}/${goarch}--${goversion}--${gotoolchain}"
+      echo "cache-key=${cache_key}" >> "${GITHUB_OUTPUT}"
+      echo "cache-dir=${cache_dir}" >> "${GITHUB_OUTPUT}"
+      echo "normalized-version=${normalized_version}" >> "${GITHUB_OUTPUT}"
+    shell: bash
+    working-directory: ${{ inputs.working-directory }}
+  - name: Cache
+    id: cache
+    uses: actions/cache@v5
+    with:
+      key: "${{ steps.prep.outputs.cache-key }}"
+      path: "${{ steps.prep.outputs.cache-dir }}"
+  - name: Build
+    id: build
+    if: steps.cache.outputs.cache-hit == ''
+    run: |
+      set -euo pipefail
+
+      package="${{ inputs.package }}"
+      version="${{ inputs.version }}"
+      normalized_version="${{ steps.prep.outputs.normalized-version }}"
+      cache_dir="${{ steps.prep.outputs.cache-dir }}"
+
+      echo "##[group]go install ${package}${version:+@${version}}"
+        GOBIN="${cache_dir}" go install "${package}@${normalized_version}"
+      echo "##[endgroup]"
+    shell: bash
+    working-directory: ${{ inputs.working-directory }}
+  - name: Install
+    id: install
+    run: |
+      set -euo pipefail
+
       output="${{ inputs.output }}"
       output_dir="${{ inputs.output-dir }}"
       output_path_env="${{ inputs.output-path-env }}"
-      
+
+      cache_dir="${{ steps.prep.outputs.cache-dir }}"
+
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
 
-      work_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
-      mkdir -p "${work_dir}"
-
-      cmd=""
-      if [[ "${modfile}" != "" ]] ; then
-        cmd="${cmd:+${cmd} }-modfile ${modfile}"
-      fi
-      cmd="${cmd:+${cmd} }${package}"
-      if [[ "${version}" != "" ]] ; then
-        cmd="${cmd}@${version}"
-      fi
-
-      echo "##[group]go install ${cmd}"
-        GOBIN="${work_dir}" go install ${cmd}
-      echo "##[endgroup]"
-
-      bin="$(ls -1 "${work_dir}")"
-      output="${output:-${bin}}"
+      artifact="$(ls -1 "${cache_dir}")"
+      output="${output:-${artifact}}"
       output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"
-      mv "${work_dir}/${bin}" "${path}"
+      cp "${cache_dir}/${artifact}" "${path}"
 
       echo "installed to: ${path}"
       echo "path=${path}" >> "${GITHUB_OUTPUT}"
       if [[ "${output_path_env}" != "" ]] ; then
         echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
       fi
-      rm -rf "${work_dir}"
     shell: bash
+    working-directory: ${{ inputs.working-directory }}

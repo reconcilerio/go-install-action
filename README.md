@@ -21,16 +21,16 @@ See [action.yml](action.yml)
   with:
     # Required package.
     # The go package to install.
-    # Default: none
+    # Default: ''
     package: ''
     # Optional version.
-    # The go package's version to install.
+    # The go module's version to install.
     # Default: none
     version: ''
-    # Optional modfile.
-    # Path to a go.mod file that defines the version for the package.
-    # Default: none
-    modfile: ''
+    # Optional package.
+    # Relative path to the go package within the module to install.
+    # Default: ''
+    working-directory: ''
     # Optional output.
     # Name of the built binary.
     # Default: none
@@ -52,7 +52,8 @@ See [action.yml](action.yml)
 steps:
 - uses: reconcilerio/go-install-action@v1
   with:
-    package: github.com/google/go-containerregistry/cmd/crane
+    module: github.com/google/go-containerregistry
+    package: cmd/crane
     output-dir: /usr/local/bin
 - run: crane ls ubuntu
 ```
