@@ -110,11 +110,12 @@ runs:
     shell: bash
     working-directory: ${{ inputs.working-directory }}
   - name: Seed workflow cache
-    if: steps.build.outcome == 'success' && inputs.cache-enabled != 'false'
+    if: success() && steps.workflow-cache.outcome != 'success' && inputs.cache-enabled != 'false'
     uses: actions/upload-artifact@v7
     with:
       name: "${{ steps.prep.outputs.artifact-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
+    continue-on-error: true
   - name: Install
     id: install
     run: |
