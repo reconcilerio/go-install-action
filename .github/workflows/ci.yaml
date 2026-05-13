@@ -77,11 +77,17 @@ jobs:
       run: |
         set -euo pipefail
 
-        if [[ "${{ ! matrix.cache-enabled }}" == "true" && "${{ steps.install.outputs.provenance }}" != "cache" ]] ; then
-          echo "::error title=Expected cache::artifact from ${{ steps.install.outputs.provenance }}"
+        cache_enabled="${{ matrix.cache-enabled }}"
+        provenance="${{ steps.install.outputs.provenance }}"
+
+        echo "cache-enabled=${cache_enabled}"
+        echo "artifact provenance=${provenance}"
+
+        if [[ "${cache_enabled}" == "true" && "${provenance}" != "cache" ]] ; then
+          echo "::error title=Expected cache::artifact from ${provenance}, expected to be from cache"
           exit 1
         fi
-        if [[ "${{ ! matrix.cache-enabled }}" == "false" && "${{ steps.install.outputs.provenance }}" != "source" ]] ; then
-          echo "::error title=Expected source::artifact from ${{ steps.install.outputs.provenance }}"
+        if [[ "${cache_enabled}" != "true" && "${provenance}" != "source" ]] ; then
+          echo "::error title=Expected source::artifact from ${provenance}, expected to be from source"
           exit 1
         fi
