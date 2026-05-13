@@ -20,13 +20,14 @@ jobs:
           version: latest
         - os: ubuntu-24.04-arm
           version: latest
-        # git tag
-        - version: v0.20.0
-        # git commit
-        - version: d36047ae385302d20acd872e28f036a475fb9417
+        - version: "v0.20.0" # git tag
+        - version: "d36047ae385302d20acd872e28f036a475fb9417" # git commit
+          cache-enabled: 'true'
         - working-directory: hack/crane
+          cache-enabled: true
         - version: latest
           output-path-env: CRANE
+          cache-enabled: 'false'
         - package: sigs.k8s.io/kind
           version: latest
           output: kind-latest
