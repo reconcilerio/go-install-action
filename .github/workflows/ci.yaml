@@ -78,6 +78,7 @@ jobs:
         set -euo pipefail
 
         cache_enabled="${{ matrix.cache-enabled }}"
+        cache_enabled="${cache_enabled:-true}"
         provenance="${{ steps.install.outputs.provenance }}"
 
         echo "cache-enabled=${cache_enabled}"

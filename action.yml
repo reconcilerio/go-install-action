@@ -17,7 +17,7 @@ inputs:
     description: environment variable containing the output path
   cache-enabled:
     description: cache built artifacts. If false, always build from source
-    default: 'true'
+    default: true
 outputs:
   path:
     description: Path to the installed package binary
@@ -75,7 +75,7 @@ runs:
     working-directory: ${{ inputs.working-directory }}
   - name: Cache
     id: cache
-    if: inputs.cache-enabled == 'true'
+    if: inputs.cache-enabled != 'false'
     uses: actions/cache@v5
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
