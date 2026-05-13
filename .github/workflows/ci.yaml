@@ -53,6 +53,12 @@ jobs:
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}
         cache-enabled: ${{ matrix.cache-enabled }}
+    - name: Debug
+      run: |
+        set -euo pipefail
+
+        tree "${RUNNER_TEMP}/reconcilerio/go-install-action"
+        ls -la "${{ steps.install.outputs.path }}"
     - name: Test install
       run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
     - name: Test install env
@@ -72,6 +78,12 @@ jobs:
       id: install
       uses: ./
       with: *with-install
+    - name: Debug
+      run: |
+        set -euo pipefail
+
+        tree "${RUNNER_TEMP}/reconcilerio/go-install-action"
+        ls -la "${{ steps.install.outputs.path }}"
     - name: Test install
       run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
     # test artifact provenance on the second job, as the first job seeds the cache
