@@ -71,6 +71,7 @@ runs:
       echo "Resolved module: ${normalized_module}@${normalized_version}"
 
       cache_key="reconcilerio/go-install-action--${package}@${normalized_version}--${goos}/${goarch}--${goversion}--${gotoolchain}"
+      echo "artifact-key=$(echo "${cache_key}" | tr '/' '-')" >> "${GITHUB_OUTPUT}"
       echo "cache-key=${cache_key}" >> "${GITHUB_OUTPUT}"
       echo "cache-dir=${cache_dir}" >> "${GITHUB_OUTPUT}"
       echo "normalized-version=${normalized_version}" >> "${GITHUB_OUTPUT}"
@@ -81,7 +82,7 @@ runs:
     if: inputs.cache-enabled != 'false'
     uses: actions/download-artifact@v8
     with:
-      name: "${{ steps.prep.outputs.cache-key }}"
+      name: "${{ steps.prep.outputs.artifact-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
     continue-on-error: true
   - name: Cache
@@ -112,7 +113,7 @@ runs:
     if: steps.build.outcome == 'success' && inputs.cache-enabled != 'false'
     uses: actions/upload-artifact@v7
     with:
-      name: "${{ steps.prep.outputs.cache-key }}"
+      name: "${{ steps.prep.outputs.artifact-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
   - name: Install
     id: install
