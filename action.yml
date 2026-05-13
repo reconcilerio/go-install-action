@@ -45,7 +45,7 @@ runs:
       goarch="$(go env GOARCH)"
 
       # create unique directory for each run
-      cache_dir="${RUNNER_TEMP}/${{ github.action_repository }}"
+      cache_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
       mkdir -p "${cache_dir}"
       cache_dir="${cache_dir}/$(ls -1 "${cache_dir}" | wc -l)"
       mkdir -p "${cache_dir}"
@@ -87,14 +87,14 @@ runs:
     continue-on-error: true
   - name: Cache
     id: cache
-    if: inputs.cache-enabled != 'false'
+    if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success'
     uses: actions/cache@v5
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
   - name: Build
     id: build
-    if: steps.cache.outputs.cache-hit == ''
+    if: steps.cache.outputs.cache-hit == '' && steps.workflow-cache.outcome != 'success'
     run: |
       set -euo pipefail
 
