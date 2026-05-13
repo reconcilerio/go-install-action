@@ -124,6 +124,6 @@ runs:
       if [[ "${output_path_env}" != "" ]] ; then
         echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
       fi
-      echo "provenance=${{ steps.build.outputs.provenance || 'cache' }}"" >> "${GITHUB_OUTPUT}"
+      echo "provenance=${{ steps.build.outputs.provenance || 'cache' }}" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
