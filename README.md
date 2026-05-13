@@ -43,6 +43,10 @@ See [action.yml](action.yml)
     # Environment variable to set the output path to.
     # Default: none
     output-path-env: ''
+    # Optional cache-enabled.
+    # Cache built artifacts. If false, always build from source.
+    # Default: true
+    cache-enabled: true
 ```
 <!-- end usage -->
 
@@ -52,8 +56,7 @@ See [action.yml](action.yml)
 steps:
 - uses: reconcilerio/go-install-action@v1
   with:
-    module: github.com/google/go-containerregistry
-    package: cmd/crane
+    package: github.com/google/go-containerregistry/cmd/crane
     output-dir: /usr/local/bin
 - run: crane ls ubuntu
 ```

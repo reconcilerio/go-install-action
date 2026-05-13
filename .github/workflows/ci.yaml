@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     name: Test go-install action
-    strategy:
+    strategy: &tests
       fail-fast: false
       matrix:
         include:
@@ -32,6 +32,7 @@ jobs:
           output: kind-latest
           output-dir: /usr/local/bin
           output-path-env: KIND
+          cache-enabled: false
           test-args: --version
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
@@ -42,7 +43,7 @@ jobs:
     - name: Install package
       id: install
       uses: ./
-      with:
+      with: &with-install
         package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
         version: ${{ matrix.version }}
         working-directory: ${{ matrix.working-directory }}
@@ -54,3 +55,32 @@ jobs:
     - name: Test install env
       if: matrix.output-path-env
       run: ${${{ matrix.output-path-env }}} ${{ matrix.test-args || 'version' }}
+  test-from-cache:
+    name: Test go-install action from cache
+    needs: test
+    strategy: *tests
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: hack/crane/go.mod
+    - name: Install package
+      id: install
+      uses: ./
+      with: *with-install
+    - name: Test install
+      run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
+    # test artifact provenance on the second job, as the first job seeds the cache
+    - name: Test provenance
+      run: |
+        set -euo pipefail
+
+        if [[ "${{ ! matrix.cache-enabled }}" == "false" && "${{ steps.install.outputs.provenance }}" != "cache" ]] ; then
+          echo "::error title=Expected cache::artifact from ${{ steps.install.outputs.provenance }}"
+          exit 1
+        fi
+        if [[ "${{ ! matrix.cache-enabled }}" == "true" && "${{ steps.install.outputs.provenance }}" != "source" ]] ; then
+          echo "::error title=Expected source::artifact from ${{ steps.install.outputs.provenance }}"
+          exit 1
+        fi

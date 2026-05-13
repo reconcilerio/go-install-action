@@ -15,10 +15,17 @@ inputs:
     description: directory to place to build binary
   output-path-env:
     description: environment variable containing the output path
+  cache-enabled:
+    description: cache built artifacts. If false, always build from source
+    type: bool
+    default: true
 outputs:
   path:
     description: Path to the installed package binary
     value: ${{ steps.install.outputs.path }}
+  provenance:
+    description: "Provenance of the output binary: 'cache' or 'source'."
+    value: ${{ steps.install.outputs.provenance }}
 runs:
   using: "composite"
   steps:
@@ -69,6 +76,7 @@ runs:
     working-directory: ${{ inputs.working-directory }}
   - name: Cache
     id: cache
+    if: inputs.cache-enabled
     uses: actions/cache@v5
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
@@ -87,6 +95,7 @@ runs:
       echo "##[group]go install ${package}${version:+@${version}}"
         GOBIN="${cache_dir}" go install "${package}@${normalized_version}"
       echo "##[endgroup]"
+      echo "provenance=source" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
   - name: Install
@@ -115,5 +124,6 @@ runs:
       if [[ "${output_path_env}" != "" ]] ; then
         echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
       fi
+      echo "provenance=${{ steps.build.outputs.provenance || 'cache' }}"" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
