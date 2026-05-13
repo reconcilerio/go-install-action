@@ -41,6 +41,7 @@ jobs:
     - uses: actions/setup-go@v6
       with:
         go-version-file: hack/crane/go.mod
+        cache-dependency-path: '**/go.sum'
     - name: Install package
       id: install
       uses: ./
@@ -82,8 +83,8 @@ jobs:
         cache_enabled="${cache_enabled:-true}"
         provenance="${{ steps.install.outputs.provenance }}"
 
-        echo "cache-enabled=${cache_enabled}"
-        echo "artifact provenance=${provenance}"
+        echo "cache-enabled = ${cache_enabled}"
+        echo "artifact-provenance = ${provenance}"
 
         if [[ "${cache_enabled}" == "true" && "${provenance}" != "cache" ]] ; then
           echo "::error title=Expected cache::artifact from ${provenance}, expected to be from cache"
