@@ -135,7 +135,7 @@ runs:
       output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"
-      cp "${cache_dir}/${artifact}" "${path}"
+      install -m 755 "${cache_dir}/${artifact}" "${path}"
 
       echo "installed to: ${path}"
       echo "path=${path}" >> "${GITHUB_OUTPUT}"
