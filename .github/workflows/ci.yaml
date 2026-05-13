@@ -50,13 +50,14 @@ jobs:
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}
+        cache-enabled: ${{ matrix.cache-enabled }}
     - name: Test install
       run: ${{ steps.install.outputs.path }} ${{ matrix.test-args || 'version' }}
     - name: Test install env
       if: matrix.output-path-env
       run: ${${{ matrix.output-path-env }}} ${{ matrix.test-args || 'version' }}
   test-from-cache:
-    name: Test go-install action from cache
+    name: Test go-install action (from cache)
     needs: test
     strategy: *tests
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -76,11 +77,11 @@ jobs:
       run: |
         set -euo pipefail
 
-        if [[ "${{ ! matrix.cache-enabled }}" == "false" && "${{ steps.install.outputs.provenance }}" != "cache" ]] ; then
+        if [[ "${{ ! matrix.cache-enabled }}" == "true" && "${{ steps.install.outputs.provenance }}" != "cache" ]] ; then
           echo "::error title=Expected cache::artifact from ${{ steps.install.outputs.provenance }}"
           exit 1
         fi
-        if [[ "${{ ! matrix.cache-enabled }}" == "true" && "${{ steps.install.outputs.provenance }}" != "source" ]] ; then
+        if [[ "${{ ! matrix.cache-enabled }}" == "false" && "${{ steps.install.outputs.provenance }}" != "source" ]] ; then
           echo "::error title=Expected source::artifact from ${{ steps.install.outputs.provenance }}"
           exit 1
         fi
