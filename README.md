@@ -45,8 +45,8 @@ See [action.yml](action.yml)
     output-path-env: ''
     # Optional cache-enabled.
     # Cache built artifacts. If false, always build from source.
-    # Default: true
-    cache-enabled: true
+    # Default: 'true'
+    cache-enabled: ''
 ```
 <!-- end usage -->
 
