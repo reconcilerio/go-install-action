@@ -12,6 +12,8 @@ inputs:
   working-directory:
     description: directory containing a go.mod file defining the package's version
     default: '.'
+  toolchain:
+    description: override GOTOOLCHAIN for this build
   output:
     description: name of the built binary
   output-dir:
@@ -44,6 +46,9 @@ runs:
       goos="$(go env GOOS)"
       goarch="$(go env GOARCH)"
 
+      toolchain="${{ inputs.toolchain }}"
+      toolchain="${toolchain:-${gotoolchain}}"
+
       # create unique directory for each run
       cache_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
       mkdir -p "${cache_dir}"
@@ -70,11 +75,12 @@ runs:
 
       echo "Resolved module: ${normalized_module}@${normalized_version}"
 
-      cache_key="reconcilerio/go-install-action--${package}@${normalized_version}--${goos}/${goarch}--${goversion}--${gotoolchain}"
+      cache_key="reconcilerio/go-install-action--${package}@${normalized_version}--${goos}/${goarch}--${goversion}--${toolchain}"
       echo "artifact-key=$(echo "${cache_key}" | tr '/' '-')" >> "${GITHUB_OUTPUT}"
       echo "cache-key=${cache_key}" >> "${GITHUB_OUTPUT}"
       echo "cache-dir=${cache_dir}" >> "${GITHUB_OUTPUT}"
       echo "normalized-version=${normalized_version}" >> "${GITHUB_OUTPUT}"
+      echo "toolchain=${toolchain}" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
   - name: Check workflow cache
@@ -102,9 +108,10 @@ runs:
       version="${{ inputs.version }}"
       normalized_version="${{ steps.prep.outputs.normalized-version }}"
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
+      toolchain="${{ steps.prep.outputs.toolchain }}"
 
       echo "##[group]go install ${package}${version:+@${version}}"
-        GOBIN="${cache_dir}" go install "${package}@${normalized_version}"
+        GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
       echo "##[endgroup]"
       echo "provenance=source" >> "${GITHUB_OUTPUT}"
     shell: bash

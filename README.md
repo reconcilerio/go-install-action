@@ -27,6 +27,10 @@ See [action.yml](action.yml)
     # The go module's version to install.
     # Default: none
     version: ''
+    # Optional toolchain.
+    # The go toolchain to use.
+    # Default: `${GOTOOLCHAIN}`
+    version: ''
     # Optional working-directory.
     # directory containing a go.mod file defining the package's version
     # Default: ''

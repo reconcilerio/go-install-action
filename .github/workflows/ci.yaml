@@ -30,6 +30,7 @@ jobs:
           cache-enabled: 'false'
         - package: sigs.k8s.io/kind
           version: latest
+          toolchain: auto
           output: kind-latest
           output-dir: /usr/local/bin
           output-path-env: KIND
