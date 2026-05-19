@@ -78,6 +78,7 @@ runs:
           # resolve the corresponding package for the tool as the cache key uses the package and version of the module for the package
           
           tools=$(GOTOOLCHAIN="${toolchain}" go list tool)
+          echo "Found tools:\n${tools}"
           
           # find exact match
           while IFS= read -r item ; do
@@ -86,7 +87,8 @@ runs:
                 echo "::error title=Duplicate tool::tool \"${tool}\" found twice in go.mod"
                 exit 1
               fi
-              package="${tool}"
+              echo "Found tool: ${item}"
+              package="${item}"
             fi
           done <<< "${tools}"
 
@@ -97,7 +99,8 @@ runs:
                 echo "::error title=Ambiguous tool::tool \"${tool}\" found twice in go.mod"
                 exit 1
               fi
-              package="${tool}"
+              echo "Found tool: ${tool} -> ${item}"
+              package="${item}"
             fi
           done <<< "${tools}"
 
