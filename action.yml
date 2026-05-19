@@ -78,7 +78,8 @@ runs:
           # resolve the corresponding package for the tool as the cache key uses the package and version of the module for the package
           
           tools=$(GOTOOLCHAIN="${toolchain}" go list tool)
-          echo "Found tools:\n${tools}"
+          echo "Found tools:"
+          echo "${tools}"
           
           # find exact match
           while IFS= read -r item ; do
@@ -104,7 +105,7 @@ runs:
             fi
           done <<< "${tools}"
 
-          if [[ "${package}" != "" ]] ; then
+          if [[ "${package}" == "" ]] ; then
             echo "::error title=Tool not defined::tool \"${tool}\" not found in go.mod"
             exit 1
           fi
@@ -165,15 +166,17 @@ runs:
       echo "##[group]go env"
         GOTOOLCHAIN="${toolchain}" go env
       echo "##[endgroup]"
+
       if [[ "${package}" != "" ]] ; then
         echo "##[group]go install ${package}${version:+@${version}}"
           GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
         echo "##[endgroup]"
-      elsif [[ "${tool}" != "" ]] ; then
+      elif [[ "${tool}" != "" ]] ; then
         echo "##[group]go tool ${tool}"
           cp $(GOTOOLCHAIN="${toolchain}" go tool -n "${tool}") "${cache_dir}/"
         echo "##[endgroup]"
       fi
+
       echo "provenance=source" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
