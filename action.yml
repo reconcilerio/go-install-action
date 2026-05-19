@@ -110,6 +110,9 @@ runs:
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
       toolchain="${{ steps.prep.outputs.toolchain }}"
 
+      echo "##[group]go env
+        GOTOOLCHAIN="${toolchain}" go env
+      echo "##[endgroup]"
       echo "##[group]go install ${package}${version:+@${version}}"
         GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
       echo "##[endgroup]"
