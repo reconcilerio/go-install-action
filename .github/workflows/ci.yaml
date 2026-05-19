@@ -49,6 +49,7 @@ jobs:
       with: &with-install
         package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
         version: ${{ matrix.version }}
+        toolchain: ${{ matrix.toolchain }}
         working-directory: ${{ matrix.working-directory }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
