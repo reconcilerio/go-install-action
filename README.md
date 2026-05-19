@@ -19,22 +19,26 @@ See [action.yml](action.yml)
 ```yaml
 - uses: reconcilerio/go-install-action@v1
   with:
-    # Required package.
-    # The go package to install.
+    # Optional package.
+    # The go package to install. Exactly one of 'package' or 'tool' is required.
     # Default: ''
     package: ''
     # Optional version.
-    # The go module's version to install.
+    # The go module's version to install. Only valid with 'package'.
     # Default: none
     version: ''
-    # Optional toolchain.
-    # The go toolchain to use.
-    # Default: `${GOTOOLCHAIN}`
-    version: ''
+    # Optional tool.
+    # The go tool defined in go.mod to install. Exactly one of 'package' or 'tool' is required.
+    # Default: none
+    tool: ''
     # Optional working-directory.
     # directory containing a go.mod file defining the package's version
     # Default: ''
     working-directory: ''
+    # Optional toolchain.
+    # The go toolchain to use.
+    # Default: `${GOTOOLCHAIN}`
+    toolchain: ''
     # Optional output.
     # Name of the built binary.
     # Default: none
@@ -54,6 +58,8 @@ See [action.yml](action.yml)
 ```
 <!-- end usage -->
 
+When building from source, an appropriate go toolchain is required. If unsure, favor a more recent toolchain version.
+
 **Basic:**
 
 ```yaml
@@ -65,7 +71,28 @@ steps:
 - run: crane ls ubuntu
 ```
 
-When building from source, an appropriate go toolchain is required. If unsure, favor a more recent toolchain version.
+The module version is resolved from go.mod, if available, defaulting to `latest`.
+
+**Tool:**
+
+```yaml
+steps:
+- uses: reconcilerio/go-install-action@v1
+  with:
+    tool: crane
+    output-dir: /usr/local/bin
+- run: crane ls ubuntu
+```
+
+Tool usage requires the tool to be defined in go.mod:
+
+```go.mod
+tool github.com/google/go-containerregistry/cmd/crane
+
+...
+
+require github.com/google/go-containerregistry v0.21.6
+```
 
 ## Community
 

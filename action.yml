@@ -5,10 +5,11 @@ branding:
 description: "Install a go package"
 inputs:
   package:
-    description: go package to install
-    required: true
+    description: go package to install. Exactly one of 'package' or 'tool' is required
   version:
-    description: version of go package to install
+    description: version of go package to install. Only valid with 'package'
+  tool:
+    description: tool defined in go.mod to install. Exactly one of 'package' or 'tool' is required
   working-directory:
     description: directory containing a go.mod file defining the package's version
     default: '.'
@@ -40,6 +41,20 @@ runs:
 
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
+      tool="${{ inputs.tool }}"
+
+      if [[ "${package}" == "" && "${tool}" == "" ]] ; then
+        echo "::error title=Missing required input::either 'package' or 'tool' input must be defined"
+        exit 1
+      fi
+      if [[ "${package}" != "" && "${tool}" != "" ]] ; then
+        echo "::error title=Mutually exclusive input::either 'package' or 'tool' input must be defined, not both"
+        exit 1
+      fi
+      if [[ "${version}" != "" && "${package}" == "" ]] ; then
+        echo "::error title=Invalid input::'version' input is only valid in conjunction with 'package'"
+        exit 1
+      fi
 
       goversion="$(go env GOVERSION)"
       gotoolchain="$(go env GOTOOLCHAIN)"
@@ -58,6 +73,39 @@ runs:
       echo "##[group]verify package and version"
         normalized_version=""
         normalized_module="${package}"
+
+        if [[ "${tool}" != "" ]] ; then
+          # resolve the corresponding package for the tool as the cache key uses the package and version of the module for the package
+          
+          tools=$(GOTOOLCHAIN="${toolchain}" go list tool)
+          
+          # find exact match
+          while IFS= read -r item ; do
+            if [[ "${item}" == "${tool}" ]] ; then
+              if [[ "${package}" != "" ]] ; then
+                echo "::error title=Duplicate tool::tool \"${tool}\" found twice in go.mod"
+                exit 1
+              fi
+              package="${tool}"
+            fi
+          done <<< "${tools}"
+
+          # find shorthand match
+          while IFS= read -r item ; do
+            if [[ "${item}" == "*/${tool}" ]] ; then
+              if [[ "${package}" != "" ]] ; then
+                echo "::error title=Ambiguous tool::tool \"${tool}\" found twice in go.mod"
+                exit 1
+              fi
+              package="${tool}"
+            fi
+          done <<< "${tools}"
+
+          if [[ "${package}" != "" ]] ; then
+            echo "::error title=Tool not defined::tool \"${tool}\" not found in go.mod"
+            exit 1
+          fi
+        fi
 
         while true; do
           if ! normalized_version="$(go list -m -f '{{.Version}}' "${normalized_module}${version:+@${version}}")" ; then
@@ -106,6 +154,7 @@ runs:
 
       package="${{ inputs.package }}"
       version="${{ inputs.version }}"
+      tool="${{ inputs.tool }}"
       normalized_version="${{ steps.prep.outputs.normalized-version }}"
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
       toolchain="${{ steps.prep.outputs.toolchain }}"
@@ -113,9 +162,15 @@ runs:
       echo "##[group]go env"
         GOTOOLCHAIN="${toolchain}" go env
       echo "##[endgroup]"
-      echo "##[group]go install ${package}${version:+@${version}}"
-        GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
-      echo "##[endgroup]"
+      if [[ "${package}" != "" ]] ; then
+        echo "##[group]go install ${package}${version:+@${version}}"
+          GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
+        echo "##[endgroup]"
+      elsif [[ "${tool}" != "" ]] ; then
+        echo "##[group]go tool ${tool}"
+          cp $(GOTOOLCHAIN="${toolchain}" go tool -n "${tool}") "${cache_dir}/"
+        echo "##[endgroup]"
+      fi
       echo "provenance=source" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}

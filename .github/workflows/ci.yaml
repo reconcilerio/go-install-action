@@ -37,6 +37,10 @@ jobs:
           output-path-env: KIND
           cache-enabled: false
           test-args: --version
+        - tool: crane
+          working-directory: hack/tools
+        - tool: github.com/google/go-containerregistry/cmd/crane
+          working-directory: hack/tools
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v6
@@ -48,10 +52,11 @@ jobs:
       id: install
       uses: ./
       with: &with-install
-        package: ${{ matrix.package || 'github.com/google/go-containerregistry/cmd/crane' }}
+        package: ${{ matrix.package || case(!matrix.package && !matrix.tool, 'github.com/google/go-containerregistry/cmd/crane', '') }}
         version: ${{ matrix.version }}
-        toolchain: ${{ matrix.toolchain }}
+        tool: ${{ matrix.tool }}
         working-directory: ${{ matrix.working-directory }}
+        toolchain: ${{ matrix.toolchain }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}
