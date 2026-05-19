@@ -18,8 +18,10 @@ jobs:
         include:
         - os: ubuntu-24.04
           version: latest
+          toolchain: auto
         - os: ubuntu-24.04-arm
           version: latest
+          toolchain: auto
         - version: "v0.20.0" # git tag
         - version: "d36047ae385302d20acd872e28f036a475fb9417" # git commit
           cache-enabled: 'true'
@@ -30,7 +32,6 @@ jobs:
           cache-enabled: 'false'
         - package: sigs.k8s.io/kind
           version: latest
-          toolchain: auto
           output: kind-latest
           output-dir: /usr/local/bin
           output-path-env: KIND
