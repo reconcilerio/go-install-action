@@ -77,7 +77,7 @@ runs:
         if [[ "${tool}" != "" ]] ; then
           # resolve the corresponding package for the tool as the cache key uses the package and version of the module for the package
 
-          tools=$(GOTOOLCHAIN="${toolchain}" go list tool)
+          tools=$(go mod edit -json | jq -r '.Tool.[].Path')
 
           # find exact match
           while IFS= read -r item; do
