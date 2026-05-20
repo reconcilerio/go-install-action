@@ -98,7 +98,7 @@ runs:
           if [[ "${normalized_module}" == "" ]] ; then
             while IFS= read -r item; do
               echo "Checking \"${item}\""
-              if [[ "${item}" == "*/${tool}" ]] ; then
+              if [[ "${item}" == */"${tool}" ]] ; then
                 if [[ "${normalized_module}" != "" ]] ; then
                   echo "::error title=Ambiguous tool::tool \"${tool}\" found twice in go.mod"
                   exit 1
