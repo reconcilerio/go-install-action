@@ -1,6 +1,6 @@
 module reconciler.io/go-install-action/hack/tools
 
-go 1.25.0 
+go 1.25.0
 
 tool (
 	github.com/google/go-containerregistry/cmd/crane
