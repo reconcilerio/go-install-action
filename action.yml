@@ -82,7 +82,7 @@ runs:
           echo "${tools}"
           
           # find exact match
-          while IFS= read -r line; do
+          while IFS= read -r item; do
             echo "Checking \"${item}\""
             if [[ "${item}" == "${tool}" ]] ; then
               if [[ "${normalized_module}" != "" ]] ; then
@@ -96,7 +96,7 @@ runs:
 
           # find shorthand match
           if [[ "${normalized_module}" == "" ]] ; then
-            while IFS= read -r line; do
+            while IFS= read -r item; do
               echo "Checking \"${item}\""
               if [[ "${item}" == "*/${tool}" ]] ; then
                 if [[ "${normalized_module}" != "" ]] ; then
