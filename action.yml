@@ -83,6 +83,7 @@ runs:
           
           # find exact match
           for item in "${tools}" ; do
+            echo "Checking \"${item}\""
             if [[ "${item}" == "${tool}" ]] ; then
               if [[ "${normalized_module}" != "" ]] ; then
                 echo "::error title=Duplicate tool::tool \"${tool}\" found twice in go.mod"
@@ -96,6 +97,7 @@ runs:
           # find shorthand match
           if [[ "${normalized_module}" == "" ]] ; then
             for item in "${tools}" ; do
+              echo "Checking \"${item}\""
               if [[ "${item}" == "*/${tool}" ]] ; then
                 if [[ "${normalized_module}" != "" ]] ; then
                   echo "::error title=Ambiguous tool::tool \"${tool}\" found twice in go.mod"
