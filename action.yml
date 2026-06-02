@@ -63,6 +63,7 @@ runs:
 
       toolchain="${{ inputs.toolchain }}"
       toolchain="${toolchain:-${gotoolchain}}"
+      export GOTOOLCHAIN="${toolchain}"
 
       # create unique directory for each run
       cache_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
@@ -162,18 +163,19 @@ runs:
       normalized_version="${{ steps.prep.outputs.normalized-version }}"
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
       toolchain="${{ steps.prep.outputs.toolchain }}"
+      export GOTOOLCHAIN="${toolchain}"
 
       echo "##[group]go env"
-        GOTOOLCHAIN="${toolchain}" go env
+        go env
       echo "##[endgroup]"
 
       if [[ "${package}" != "" ]] ; then
         echo "##[group]go install ${package}${version:+@${version}}"
-          GOBIN="${cache_dir}" GOTOOLCHAIN="${toolchain}" go install "${package}@${normalized_version}"
+          GOBIN="${cache_dir}" go install "${package}@${normalized_version}"
         echo "##[endgroup]"
       elif [[ "${tool}" != "" ]] ; then
         echo "##[group]go tool ${tool}"
-          cp $(GOTOOLCHAIN="${toolchain}" go tool -n "${tool}") "${cache_dir}/"
+          cp $(go tool -n "${tool}") "${cache_dir}/"
         echo "##[endgroup]"
       fi
 
