@@ -43,7 +43,7 @@ jobs:
           working-directory: hack/tools
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-go@v6
       with:
         go-version-file: hack/crane/go.mod
@@ -78,7 +78,7 @@ jobs:
     strategy: *tests
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-go@v6
       with:
         go-version-file: hack/crane/go.mod
