@@ -151,9 +151,10 @@ runs:
       url=$(eval echo "${{ inputs.binary-url-template }}")
 
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
+      name="$(basename "${{ inputs.package }}")"
 
       echo "Checking URL ${url}"
-      if curl -sSL --fail "${url}" -o "${cache_dir}/download" ; then
+      if curl -sSL --fail "${url}" -o "${cache_dir}/${name}" ; then
         echo "provenance=downloaded" >> "${GITHUB_OUTPUT}"
       else
         echo "Download failed with exit code $?"
