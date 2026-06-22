@@ -110,11 +110,13 @@ jobs:
         echo "cache-enabled = ${cache_enabled}"
         echo "artifact-provenance = ${provenance}"
 
-        if [[ "${cache_enabled}" == "true" && "${provenance}" != "cache" ]] ; then
-          echo "::error title=Expected cache::artifact from ${provenance}, expected to be from cache"
-          exit 1
-        fi
-        if [[ "${cache_enabled}" != "true" && "${provenance}" != "source" ]] ; then
-          echo "::error title=Expected source::artifact from ${provenance}, expected to be from source"
-          exit 1
+        if [[ "${provenance}" != "download" ]] ; then
+          if [[ "${cache_enabled}" == "true" && "${provenance}" != "cache" ]] ; then
+            echo "::error title=Expected cache::artifact from ${provenance}, expected to be from cache"
+            exit 1
+          fi
+          if [[ "${cache_enabled}" != "true" && "${provenance}" != "source" ]] ; then
+            echo "::error title=Expected source::artifact from ${provenance}, expected to be from source"
+            exit 1
+          fi
         fi

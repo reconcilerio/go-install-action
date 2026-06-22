@@ -155,7 +155,7 @@ runs:
 
       echo "Checking URL ${url}"
       if curl -sSL --fail "${url}" -o "${cache_dir}/${name}" ; then
-        echo "provenance=downloaded" >> "${GITHUB_OUTPUT}"
+        echo "provenance=download" >> "${GITHUB_OUTPUT}"
       else
         echo "Download failed with exit code $?"
       fi
@@ -163,7 +163,7 @@ runs:
     shell: bash
   - name: Check workflow cache
     id: workflow-cache
-    if: inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'downloaded'
+    if: inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'download'
     uses: actions/download-artifact@v8
     with:
       name: "${{ steps.prep.outputs.artifact-key }}"
@@ -171,14 +171,14 @@ runs:
     continue-on-error: true
   - name: Cache
     id: cache
-    if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'downloaded'
+    if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'download'
     uses: actions/cache@v5
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
   - name: Build
     id: build
-    if: steps.cache.outputs.cache-hit == '' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'downloaded'
+    if: steps.cache.outputs.cache-hit == '' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'download'
     run: |
       set -euo pipefail
 
@@ -208,7 +208,7 @@ runs:
     shell: bash
     working-directory: ${{ inputs.working-directory }}
   - name: Seed workflow cache
-    if: success() && steps.workflow-cache.outcome != 'success' && inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'downloaded'
+    if: success() && steps.workflow-cache.outcome != 'success' && inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'download'
     uses: actions/upload-artifact@v7
     with:
       name: "${{ steps.prep.outputs.artifact-key }}"
