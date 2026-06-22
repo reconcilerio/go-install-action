@@ -146,7 +146,7 @@ runs:
 
       os="$(go env GOOS)"
       arch="$(go env GOARCH)"
-      version="${{ inputs.version }}"
+      version="${{ steps.prep.outputs.normalized-version }}"
 
       url=$(eval echo "${{ inputs.binary-url-template }}")
 
