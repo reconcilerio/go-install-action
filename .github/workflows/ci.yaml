@@ -41,6 +41,9 @@ jobs:
           working-directory: hack/tools
         - tool: github.com/google/go-containerregistry/cmd/crane
           working-directory: hack/tools
+        - package: sigs.k8s.io/kind
+          version: latest
+          binary-url-template: https://github.com/kubernetes-sigs/kind/releases/download/${version}/kind-${os}-${arch}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v6
@@ -57,6 +60,7 @@ jobs:
         tool: ${{ matrix.tool }}
         working-directory: ${{ matrix.working-directory }}
         toolchain: ${{ matrix.toolchain }}
+        binary-url-template: ${{ matrix.binary-url-template }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}

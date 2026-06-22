@@ -15,6 +15,8 @@ inputs:
     default: '.'
   toolchain:
     description: override GOTOOLCHAIN for this build
+  binary-url-template:
+    description: URL template to resolve a pre-built binary. If the expanded URL resolves to an artifact, no artifact will be built or cached.
   output:
     description: name of the built binary
   output-dir:
@@ -136,9 +138,31 @@ runs:
       echo "toolchain=${toolchain}" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
+  - name: Attempt download
+    id: download
+    if: inputs.binary-url-template != ''
+    run: |
+      set -euo pipefail
+
+      os="$(go env GOOS)"
+      arch="$(go env GOARCH)"
+      version="${{ inputs.version }}"
+
+      url=$(eval echo "${{ inputs.binary-url-template }}")
+
+      cache_dir="${{ steps.prep.outputs.cache-dir }}"
+
+      echo "Checking URL ${url}"
+      if curl -sSL --fail "${url}" -o "${cache_dir}/download" ; then
+        echo "provenance=downloaded" >> "${GITHUB_OUTPUT}"
+      else
+        echo "Download failed with exit code $?"
+      fi
+
+    shell: bash
   - name: Check workflow cache
     id: workflow-cache
-    if: inputs.cache-enabled != 'false'
+    if: inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'downloaded'
     uses: actions/download-artifact@v8
     with:
       name: "${{ steps.prep.outputs.artifact-key }}"
@@ -146,14 +170,14 @@ runs:
     continue-on-error: true
   - name: Cache
     id: cache
-    if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success'
+    if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'downloaded'
     uses: actions/cache@v5
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
   - name: Build
     id: build
-    if: steps.cache.outputs.cache-hit == '' && steps.workflow-cache.outcome != 'success'
+    if: steps.cache.outputs.cache-hit == '' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'downloaded'
     run: |
       set -euo pipefail
 
@@ -183,7 +207,7 @@ runs:
     shell: bash
     working-directory: ${{ inputs.working-directory }}
   - name: Seed workflow cache
-    if: success() && steps.workflow-cache.outcome != 'success' && inputs.cache-enabled != 'false'
+    if: success() && steps.workflow-cache.outcome != 'success' && inputs.cache-enabled != 'false' && steps.download.outputs.provenance != 'downloaded'
     uses: actions/upload-artifact@v7
     with:
       name: "${{ steps.prep.outputs.artifact-key }}"
@@ -215,6 +239,6 @@ runs:
       if [[ "${output_path_env}" != "" ]] ; then
         echo "${output_path_env}=${path}" >> "${GITHUB_ENV}"
       fi
-      echo "provenance=${{ steps.build.outputs.provenance || 'cache' }}" >> "${GITHUB_OUTPUT}"
+      echo "provenance=${{ steps.download.outputs.provenance || steps.build.outputs.provenance || 'cache' }}" >> "${GITHUB_OUTPUT}"
     shell: bash
     working-directory: ${{ inputs.working-directory }}
