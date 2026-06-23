@@ -110,9 +110,17 @@ jobs:
       run: |
         set -euo pipefail
 
-        provenance="${{ steps.install.outputs.provenance }}"
-        expect_provenance="${{ matrix.expect-provenance || case(!matrix.cache-enabled, 'cache', 'source') }}"
+        expect_provenance="${{ matrix.expect-provenance }}"
+        if [[ "${expect_provenance}" == "" ]] ; then
+          cache_enabled="${{ matrix.cache-enabled }}"
+          if [[ "${cache_enabled:-true}" == "true" ]] ; then
+            expect_provenance=cache
+          else
+            expect_provenance=source
+          fi
+        fi
 
+        provenance="${{ steps.install.outputs.provenance }}"
         echo "artifact-provenance = ${provenance}"
 
         if [[ "${expect_provenance}" != "${provenance}" ]] ; then
