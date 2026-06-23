@@ -111,7 +111,7 @@ jobs:
         set -euo pipefail
 
         provenance="${{ steps.install.outputs.provenance }}"
-        expect_provenance="${{ matrix.expect-provenance || case(!matrix.cache-enabled, 'source', 'cache') }}"
+        expect_provenance="${{ matrix.expect-provenance || case(!matrix.cache-enabled, 'cache', 'source') }}"
 
         echo "artifact-provenance = ${provenance}"
 
