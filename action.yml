@@ -159,7 +159,7 @@ runs:
       echo "Checking URL ${url}"
       if curl -sSL --fail "${url}" -o "${cache_dir}/.download" ; then
         if [[ -n "${path_within}" ]] ; then
-          trap rm "${cache_dir}/.download" EXIT
+          trap 'rm "${cache_dir}/.download"' EXIT
           tar -xf "${cache_dir}/.download" -C "${cache_dir}" "${path_within}" || exit 0
         else
           mv "${cache_dir}/.download" "${cache_dir}/${name}"
