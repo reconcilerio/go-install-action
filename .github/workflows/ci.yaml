@@ -50,6 +50,11 @@ jobs:
           download-url-template: https://github.com/google/go-containerregistry/releases/download/${version}/go-containerregistry_${os^}_${arch/amd64/x86_64}.tar.gz
           download-path-within-archive: crane
           expect-provenance: download
+        - package: github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+          version: latest
+          download-url-template: https://github.com/golangci/golangci-lint/releases/download/${version}/golangci-lint-${version:1}-${os}-${arch}.tar.gz
+          download-path-within-archive: golangci-lint-${version}/golangci-lint
+          expect-provenance: download
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v7

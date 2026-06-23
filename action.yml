@@ -151,10 +151,10 @@ runs:
       version="${{ steps.prep.outputs.normalized-version }}"
 
       url=$(eval echo "${{ inputs.download-url-template }}")
+      path_within=$(eval echo "${{ inputs.download-path-within-archive  }}")
 
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
       name="$(basename "${{ inputs.package }}")"
-      path_within="${{ inputs.download-path-within-archive }}"
 
       echo "Checking URL ${url}"
       if curl -sSL --fail "${url}" -o "${cache_dir}/.download" ; then

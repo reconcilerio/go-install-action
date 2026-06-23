@@ -99,7 +99,7 @@ Available variables:
 - `arch` - value returned for the current environment from `go env GOARCH`.
 - any other variable in the current environment
 
-URLs that resolve to an archive can specify the path within the archive to the binary with `download-path-within-archive`. Currently, only tar archives are supported.
+URLs that resolve to an archive can specify the path within the archive to the binary with `download-path-within-archive`, which is also evaluated as a bash template. Currently, only tar archives are supported.
 
 Artifacts resolved from a URL skip participation with the caches, and build specific inputs.
 
