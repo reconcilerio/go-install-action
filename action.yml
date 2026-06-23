@@ -237,12 +237,12 @@ runs:
       gobin="$(go env GOBIN)"
       gopath="$(go env GOPATH)"
 
-      artifact="$(ls -1 "${cache_dir}")"
-      output="${output:-${artifact}}"
+      artifact="$(find "${cache_dir}" -type f)"
+      output="${output:-$(basename "${artifact}")}"
       output_dir="${output_dir:-${gobin:-${gopath}/bin}}"
       mkdir -p "${output_dir}"
       path="${output_dir}/${output}"
-      install -m 755 "${cache_dir}/${artifact}" "${path}"
+      install -m 755 "${artifact}" "${path}"
 
       echo "installed to: ${path}"
       echo "path=${path}" >> "${GITHUB_OUTPUT}"
