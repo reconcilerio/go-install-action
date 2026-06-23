@@ -39,6 +39,12 @@ See [action.yml](action.yml)
     # The go toolchain to use.
     # Default: `${GOTOOLCHAIN}`
     toolchain: ''
+    # Optional binary-url-template
+    # URL template to resolve a pre-built binary. If the expanded URL resolves to an artifact, no artifact will be built or cached.
+    binary-url-template: ''
+    # Optional binary-path-within-archive
+    # Path within an archive resolved by binary-url-template.
+    binary-path-within-archive: ''
     # Optional output.
     # Name of the built binary.
     # Default: none
@@ -72,6 +78,30 @@ steps:
 ```
 
 The module version is resolved from go.mod, if available, defaulting to `latest`.
+
+**Pre-built:**
+
+```yaml
+steps:
+- uses: reconcilerio/go-install-action@v1
+  with:
+  package: sigs.k8s.io/kustomize/kustomize/v5
+  binary-url-template: https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${version}/kustomize_${version}_${os}_${arch}.tar.gz
+  binary-path-within-archive: kustomize
+- run: kustomize --help
+```
+
+The `binary-url-template` input defines a templated evaluated in a bash shell producing a URL containing the binary to install. If the URL resolves, it is installed. If the URL does not resolve to the binary, it falls back to building from source.
+
+Available variables:
+- `version` - normalized version for the go package
+- `os` - value returned for the current environment from `go env GOOS`.
+- `arch` - value returned for the current environment from `go env GOARCH`.
+- any other variable in the current environment
+
+URLs that resolve to an archive can specify the path within the archive to the binary with `binary-path-within-archive`. Currently, only tar archives are supported.
+
+Artifacts resolved from a URL skip participation with the caches, and build specific inputs.
 
 **Tool:**
 
