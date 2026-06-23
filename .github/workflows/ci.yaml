@@ -43,12 +43,12 @@ jobs:
           working-directory: hack/tools
         - package: sigs.k8s.io/kind
           version: latest
-          binary-url-template: https://github.com/kubernetes-sigs/kind/releases/download/${version}/kind-${os}-${arch}
+          download-url-template: https://github.com/kubernetes-sigs/kind/releases/download/${version}/kind-${os}-${arch}
           expect-provenance: download
         - package: github.com/google/go-containerregistry/cmd/crane
           version: v0.21.7
-          binary-url-template: https://github.com/google/go-containerregistry/releases/download/${version}/go-containerregistry_${os^}_${arch/amd64/x86_64}.tar.gz
-          binary-path-within-archive: crane
+          download-url-template: https://github.com/google/go-containerregistry/releases/download/${version}/go-containerregistry_${os^}_${arch/amd64/x86_64}.tar.gz
+          download-path-within-archive: crane
           expect-provenance: download
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
@@ -66,8 +66,8 @@ jobs:
         tool: ${{ matrix.tool }}
         working-directory: ${{ matrix.working-directory }}
         toolchain: ${{ matrix.toolchain }}
-        binary-url-template: ${{ matrix.binary-url-template }}
-        binary-path-within-archive: ${{ matrix.binary-path-within-archive }}
+        download-url-template: ${{ matrix.download-url-template }}
+        download-path-within-archive: ${{ matrix.download-path-within-archive }}
         output: ${{ matrix.output }}
         output-dir: ${{ matrix.output-dir }}
         output-path-env: ${{ matrix.output-path-env }}

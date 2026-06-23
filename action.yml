@@ -15,10 +15,10 @@ inputs:
     default: '.'
   toolchain:
     description: override GOTOOLCHAIN for this build
-  binary-url-template:
+  download-url-template:
     description: URL template to resolve a pre-built binary. If the expanded URL resolves to an artifact, no artifact will be built or cached.
-  binary-path-within-archive:
-    description: Path within an archive resolved by binary-url-template.
+  download-path-within-archive:
+    description: Path within an archive resolved by download-url-template.
   output:
     description: name of the built binary
   output-dir:
@@ -142,7 +142,7 @@ runs:
     working-directory: ${{ inputs.working-directory }}
   - name: Attempt download
     id: download
-    if: inputs.binary-url-template != ''
+    if: inputs.download-url-template != ''
     run: |
       set -euo pipefail
 
@@ -150,11 +150,11 @@ runs:
       arch="$(go env GOARCH)"
       version="${{ steps.prep.outputs.normalized-version }}"
 
-      url=$(eval echo "${{ inputs.binary-url-template }}")
+      url=$(eval echo "${{ inputs.download-url-template }}")
 
       cache_dir="${{ steps.prep.outputs.cache-dir }}"
       name="$(basename "${{ inputs.package }}")"
-      path_within="${{ inputs.binary-path-within-archive }}"
+      path_within="${{ inputs.download-path-within-archive }}"
 
       echo "Checking URL ${url}"
       if curl -sSL --fail "${url}" -o "${cache_dir}/.download" ; then
