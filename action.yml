@@ -182,7 +182,7 @@ runs:
   - name: Cache
     id: cache
     if: inputs.cache-enabled != 'false' && steps.workflow-cache.outcome != 'success' && steps.download.outputs.provenance != 'download'
-    uses: actions/cache@v5
+    uses: actions/cache@v6
     with:
       key: "${{ steps.prep.outputs.cache-key }}"
       path: "${{ steps.prep.outputs.cache-dir }}"
