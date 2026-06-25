@@ -69,13 +69,7 @@ runs:
       toolchain="${toolchain:-${gotoolchain}}"
       export GOTOOLCHAIN="${toolchain}"
 
-      # create unique directory for each run
-      mkdir -p "${RUNNER_TEMP}/reconcilerio/go-install-action"
-      cache_dir="$(mktemp -d -p "${RUNNER_TEMP}/reconcilerio/go-install-action" "$(basename "${package}").XXXXXXXXXX")"
-
       echo "##[group]verify package and version"
-        normalized_version=""
-        normalized_module="${package}"
 
         if [[ "${tool}" != "" ]] ; then
           # resolve the corresponding package for the tool as the cache key uses the package and version of the module for the package
@@ -85,34 +79,37 @@ runs:
           # find exact match
           while IFS= read -r item; do
             if [[ "${item}" == "${tool}" ]] ; then
-              if [[ "${normalized_module}" != "" ]] ; then
+              if [[ "${package}" != "" ]] ; then
                 echo "::error title=Duplicate tool::tool \"${tool}\" found twice in go.mod"
                 exit 1
               fi
               echo "Found tool: ${item}"
-              normalized_module="${item}"
+              package="${item}"
             fi
           done <<< "${tools}"
 
           # find shorthand match
-          if [[ "${normalized_module}" == "" ]] ; then
+          if [[ "${package}" == "" ]] ; then
             while IFS= read -r item; do
               if [[ "${item}" == */"${tool}" ]] ; then
-                if [[ "${normalized_module}" != "" ]] ; then
+                if [[ "${package}" != "" ]] ; then
                   echo "::error title=Ambiguous tool::tool \"${tool}\" found twice in go.mod"
                   exit 1
                 fi
                 echo "Found tool: ${tool} -> ${item}"
-                normalized_module="${item}"
+                package="${item}"
               fi
             done <<< "${tools}"
           fi
 
-          if [[ "${normalized_module}" == "" ]] ; then
+          if [[ "${package}" == "" ]] ; then
             echo "::error title=Tool not defined::tool \"${tool}\" not found in go.mod"
             exit 1
           fi
         fi
+
+        normalized_version=""
+        normalized_module="${package}"
 
         while true; do
           if ! normalized_version="$(go list -m -f '{{.Version}}' "${normalized_module}${version:+@${version}}")" ; then
@@ -129,6 +126,11 @@ runs:
       echo "##[endgroup]"
 
       echo "Resolved module: ${normalized_module}@${normalized_version}"
+
+      # create unique directory for each run
+      mkdir -p "${RUNNER_TEMP}/reconcilerio/go-install-action"
+      cache_dir="$(mktemp -d -p "${RUNNER_TEMP}/reconcilerio/go-install-action" "$(basename "${package}").XXXXXXXXXX")"
+      echo "Using cache_dir: ${cache_dir}"
 
       cache_key="reconcilerio/go-install-action--${package}@${normalized_version}--${goos}/${goarch}--${goversion}--${toolchain}"
       echo "artifact-key=$(echo "${cache_key}" | tr '/' '-')" >> "${GITHUB_OUTPUT}"
