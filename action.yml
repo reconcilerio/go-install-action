@@ -70,10 +70,7 @@ runs:
       export GOTOOLCHAIN="${toolchain}"
 
       # create unique directory for each run
-      cache_dir="${RUNNER_TEMP}/reconcilerio/go-install-action"
-      mkdir -p "${cache_dir}"
-      cache_dir="${cache_dir}/$(ls -1 "${cache_dir}" | wc -l)"
-      mkdir -p "${cache_dir}"
+      cache_dir="$(mktemp -d -p "${RUNNER_TEMP}/reconcilerio/go-install-action" "$(basename "${package}").XXXXXXXXXX")"
 
       echo "##[group]verify package and version"
         normalized_version=""
